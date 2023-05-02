@@ -1,0 +1,14 @@
+Task 6:
+SELECT StudentBorrowing
+FROM books
+WHERE StudentBorrowing IS NOT NULL
+GROUP BY StudentBorrowing
+HAVING COUNT(*) > 1;
+
+Task 7:
+Step 1: Open heidiSql and login.
+Step 2: Right-click -> Create new -> Database.
+Step 3: Open database and go to "Query" tab.
+Step 4: Right-click -> Load SQL File -> u22744968_bookshopsystem.sql (in this current folder).
+Step 5: Click run button and refresh the database.
+Step 6: You now have the database.
