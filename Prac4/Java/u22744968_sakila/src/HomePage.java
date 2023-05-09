@@ -25,6 +25,7 @@ public class HomePage extends JFrame
     private JTable filmsTable;
     private JScrollPane filmsTableScroll;
     Connection conn = null;
+    AddFilm addFilm;
     public HomePage(String title) 
     {
         super(title);
@@ -141,8 +142,20 @@ public class HomePage extends JFrame
         populateFilms();
         addFilmButton.addActionListener(e -> 
         {
-            AddFilm addFilm = new AddFilm("Add Film", this);
+            if(addFilm == null)
+            {
+                addFilm = new AddFilm("Add Film", conn, this);
+            }
             addFilm.setVisible(true);
+            setEnabled(false);
+            addFilm.addWindowListener(new WindowAdapter() 
+            {
+                @Override
+                public void windowClosed(WindowEvent e) 
+                {
+                    setEnabled(true);
+                }
+            });
         });
     }
     private void populateFilms()
@@ -175,7 +188,7 @@ public class HomePage extends JFrame
         {
         }
     }
-    private ResultSet selectQuery(String query)
+    public ResultSet selectQuery(String query)
     {
         ResultSet rs = null;
         try
@@ -188,6 +201,18 @@ public class HomePage extends JFrame
             ex.printStackTrace();
         }
         return rs;
+    }
+    public void insertQuery(String query)
+    {
+        try
+        {
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate(query);
+        }
+        catch(Exception ex)
+        {
+            ex.printStackTrace();
+        }
     }
     private void filterTable(String searchStr) 
     {

@@ -1,22 +1,86 @@
 import javax.swing.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import javax.xml.transform.Result;
 
-public class AddFilm extends JFrame {
-    private JTextField textField1;
-    private HomePage homePage;
+import java.awt.Color;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.sql.Connection;
+import java.sql.ResultSet;
 
-    public AddFilm(String title, HomePage homePage) 
+public class AddFilm extends JFrame 
+{
+
+    private JTextField titleField;
+    private JTextField descriptionField;
+    private JTextField releaseYearField;
+    private JComboBox languageBox;
+    private JComboBox orginalLanguageBox;
+    private JTextField lengthField;
+    private JTextField rentalDurationField;
+    private JTextField rentalCostField;
+    private JTextField replacementCostField;
+    private JComboBox ratingBox;
+    private JButton submitButton;
+    private JButton backButton;
+    private JCheckBox trailersCheck;
+    private JCheckBox deletedCheck;
+    private JCheckBox commentariesCheck;
+    private JCheckBox bndScenesCheck;
+    private JPanel preferences;
+    private JPanel mainPanel;
+
+    public AddFilm(String title, Connection conn, HomePage homePage)
     {
         super(title);
-        this.homePage = homePage;
-        this.homePage.setVisible(false);
-        this.addWindowListener(new WindowAdapter() 
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        this.setContentPane(mainPanel);
+        this.setSize(500, 500);
+        this.setLocationRelativeTo(null);
+        setPlaceholderText(titleField, "Title...");
+        setPlaceholderText(descriptionField, "Description...");
+        setPlaceholderText(releaseYearField, "Release Year...");
+        setPlaceholderText(lengthField, "Length...");
+        setPlaceholderText(rentalDurationField, "Rental Duration...");
+        setPlaceholderText(rentalCostField, "Rental Cost...");
+        setPlaceholderText(replacementCostField, "Replacement Cost...");
+        ResultSet rs= homePage.selectQuery("SELECT name FROM language");
+        try
+        {
+            while(rs.next())
+            {
+                languageBox.addItem(rs.getString("name"));
+                orginalLanguageBox.addItem(rs.getString("name"));
+            }
+        }
+        catch(Exception ex)
+        {
+            ex.printStackTrace();
+        }
+        ResultSet rs2= homePage.selectQuery("SELECT rating FROM film_rating");
+    }
+    private void setPlaceholderText(JTextField field, String text)
+    {
+        field.setText(text);
+        field.setForeground(Color.GRAY);
+        field.addFocusListener(new FocusListener() 
         {
             @Override
-            public void windowClosed(WindowEvent e) 
+            public void focusGained(FocusEvent e) 
             {
-                homePage.setVisible(true);
+                if (field.getText().equals(text)) 
+                {
+                    field.setText("");
+                    field.setForeground(Color.BLACK);
+                }
+            }
+            @Override
+            public void focusLost(FocusEvent e) 
+            {
+                if (field.getText().isEmpty()) 
+                {
+                    field.setForeground(Color.GRAY);
+                    field.setText(text);
+                }
             }
         });
     }
