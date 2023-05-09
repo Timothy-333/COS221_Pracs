@@ -11,6 +11,8 @@ import java.sql.Statement;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 public class HomePage extends JFrame 
 {
     private JPanel mainPanel;
@@ -139,6 +141,8 @@ public class HomePage extends JFrame
         populateFilms();
         addFilmButton.addActionListener(e -> 
         {
+            AddFilm addFilm = new AddFilm("Add Film", this);
+            addFilm.setVisible(true);
         });
     }
     private void populateFilms()
