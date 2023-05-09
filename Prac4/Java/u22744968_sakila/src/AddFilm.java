@@ -51,9 +51,9 @@ public class AddFilm extends JFrame
         setPlaceholderText(titleField, "Title...");
         setPlaceholderText(descriptionField, "Description...");
         setPlaceholderText(releaseYearField, "Release Year...");
-        setPlaceholderText(lengthField, "Length...");
-        setPlaceholderText(rentalDurationField, "Rental Duration...");
-        setPlaceholderText(rentalCostField, "Rental Cost...");
+        setPlaceholderText(lengthField, "Length (minutes)...)");
+        setPlaceholderText(rentalDurationField, "Rental Duration (days)...");
+        setPlaceholderText(rentalCostField, "Rental Cost (per day)...)");
         setPlaceholderText(replacementCostField, "Replacement Cost...");
         ResultSet rs= homePage.selectQuery("SELECT name FROM language");
         try

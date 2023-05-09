@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.awt.Color;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
@@ -34,8 +35,7 @@ public class HomePage extends JFrame
     private JTable notificationsTable;
     private JTabbedPane notificationsTabsPane;
     private JButton notificationsCreateSubmitBtn;
-    private JButton notificationsDeleteSubmitBtn;
-    private JButton notificationsListSubmitBtn;
+    private JButton ntfDeleteSubmitBtn;
     private JTable notificationsAllTable;
     private JTable notificationsDroppedTable;
     private JPanel homeJPanel;
@@ -54,6 +54,25 @@ public class HomePage extends JFrame
     private JComboBox ntfCcityBox;
     private JTextField ntfCpcode;
     private JTextField ntfCphone;
+    private JButton ntfUSubmitBtn;
+    private JTextField ntfUSetField;
+    private JTextField ntfUWhereField;
+    private JTextField ntfUEqualsField;
+    private JTextField ntfUDataField;
+    private JComboBox ntfUSetCB;
+    private JComboBox ntfUWhereCB;
+    private JTextField ntfDEqualsField;
+    private JComboBox ntfDWhereCB;
+    private JComboBox ntfDWhereCB2;
+    private JTextField ntfDEqualsField2;
+    private JComboBox ntfDWhereCB3;
+    private JTextField ntfDEqualsField3;
+    private JComboBox ntfUWhereCB2;
+    private JComboBox ntfUWhereCB3;
+    private JTextField ntfUEqualsField2;
+    private JTextField ntfUEqualsField3;
+    private JTextField ntfLSearch1;
+    private JTextField ntfLSearch2;
     Connection conn = null;
     AddFilm addFilm;
     public HomePage(String title) 
@@ -113,6 +132,7 @@ public class HomePage extends JFrame
     }
     private void staffTab()
     {
+        setPlaceholderText(staffSearchTextField, "Search...");
         try
         {
             ResultSet rs = selectQuery("SELECT * FROM staff");
@@ -158,7 +178,7 @@ public class HomePage extends JFrame
                 @Override
                 public void keyReleased(KeyEvent e) 
                 {
-                    filterTable(staffSearchTextField.getText());
+                    filterTable(staffSearchTextField.getText(), staffTable);
                 }
             });            
         }
@@ -212,7 +232,6 @@ public class HomePage extends JFrame
     }
     private void notificationsTab()
     {
-        System.out.println("Notifications Tab");
         notificationsTabsPane.addChangeListener(new ChangeListener() 
         {
             @Override
@@ -220,7 +239,6 @@ public class HomePage extends JFrame
             {
                 JTabbedPane sourceTabbedPane = (JTabbedPane) e.getSource();
                 int index = sourceTabbedPane.getSelectedIndex();
-                System.out.println(index);
                 switch(index)
                 {
                     case 0:
@@ -245,8 +263,13 @@ public class HomePage extends JFrame
     }
     private void createClient()
     {
-        notificationsCreateSubmitBtn.addActionListener(null);
-
+        for (ActionListener listener : notificationsCreateSubmitBtn.getActionListeners()) 
+        {
+            notificationsCreateSubmitBtn.removeActionListener(listener);
+        }
+        clearComboBox(ntfCstore_id);
+        clearComboBox(ntfCcityBox);
+        clearComboBox(ntfCactive);
         setPlaceholderText(ntfCfname, "First Name...");
         setPlaceholderText(ntfClname, "Last Name...");
         setPlaceholderText(ntfCemail, "Email...");
@@ -289,7 +312,6 @@ public class HomePage extends JFrame
             String address1 = ntfCaddress1.getText();
             String address2 = ntfCaddress2.getText();
             String district = ntfCdistrict.getText();
-            String city = ntfCcityBox.getSelectedItem().toString();
             String pcode = ntfCpcode.getText();
             String phone = ntfCphone.getText();
             String store = ntfCstore_id.getSelectedItem().toString();
@@ -357,15 +379,197 @@ public class HomePage extends JFrame
     }
     private void updateClient()
     {
-        
-    }
-    private void deleteClient()
-    {
+        for (ActionListener listener : ntfUSubmitBtn.getActionListeners()) 
+        {
+            ntfUSubmitBtn.removeActionListener(listener);
+        }
+        clearComboBox(ntfUSetCB);
+        clearComboBox(ntfUWhereCB);
+        clearComboBox(ntfUWhereCB2);
+        clearComboBox(ntfUWhereCB3);
+        String[] setItems = {"store_id", "first_name", "last_name", "email", "address_id", "active"};
+        setComboBox(ntfUSetCB, setItems);
+        String[] whereItems = {"customer_id", "store_id", "first_name", "last_name", "email", "address_id", "active"};
+        setComboBox(ntfUWhereCB, whereItems);
+        setComboBox(ntfUWhereCB2, whereItems);
+        setComboBox(ntfUWhereCB3, whereItems);
+        ntfUSubmitBtn.addActionListener(e2 -> 
+        {
+            String set = ntfUSetCB.getSelectedItem().toString();
+            String where = ntfUWhereCB.getSelectedItem().toString();
+            String equals = ntfUEqualsField.getText();
+            String data = ntfUDataField.getText();
+            String query = "UPDATE customer SET " + set + " = ? WHERE " + where + " = ?";
 
+            if(!ntfUEqualsField2.getText().isEmpty())
+            {
+                String where2 = ntfUWhereCB2.getSelectedItem().toString();
+                String equals2 = ntfUEqualsField2.getText();
+                query += " AND " + where2 + " = ?";
+                if(!ntfUEqualsField3.getText().isEmpty())
+                {
+                    String where3 = ntfUWhereCB3.getSelectedItem().toString();
+                    String equals3 = ntfUEqualsField3.getText();
+                    query += " AND " + where3 + " = ?";
+                }
+            }
+            try
+            {
+                PreparedStatement stmt = conn.prepareStatement(query);
+                stmt.setString(1, data);
+                stmt.setString(2, equals);
+                if(!ntfUEqualsField2.getText().isEmpty())
+                {
+                    String equals2 = ntfUEqualsField2.getText();
+                    stmt.setString(3, equals2);
+                    if(!ntfUEqualsField3.getText().isEmpty())
+                    {
+                        String equals3 = ntfUEqualsField3.getText();
+                        stmt.setString(4, equals3);
+                    }
+                }
+                stmt.executeUpdate();
+                JOptionPane.showMessageDialog(this, "Record updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+            catch(SQLException ex)
+            {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error updating customer!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
     }
+    private void deleteClient() 
+    {
+        for (ActionListener listener : ntfDeleteSubmitBtn.getActionListeners()) 
+        {
+            ntfDeleteSubmitBtn.removeActionListener(listener);
+        }
+        clearComboBox(ntfDWhereCB);
+        clearComboBox(ntfDWhereCB2);
+        clearComboBox(ntfDWhereCB3);
+        String[] whereItems = {"customer_id", "store_id", "first_name", "last_name", "email", "address_id", "active"};
+        setComboBox(ntfDWhereCB, whereItems);
+        setComboBox(ntfDWhereCB2, whereItems);
+        setComboBox(ntfDWhereCB3, whereItems);
+        ntfDeleteSubmitBtn.addActionListener(e2 -> 
+        {
+            String where = ntfDWhereCB.getSelectedItem().toString();
+            String equals = ntfDEqualsField.getText();
+            String query = "DELETE FROM customer WHERE " + where + " = ?";
+            if (!ntfDEqualsField2.getText().isEmpty()) 
+            {
+                String where2 = ntfDWhereCB2.getSelectedItem().toString();
+                String equals2 = ntfDEqualsField2.getText();
+                query += " AND " + where2 + " = ?";
+                if (!ntfDEqualsField3.getText().isEmpty()) {
+                    String where3 = ntfDWhereCB3.getSelectedItem().toString();
+                    String equals3 = ntfDEqualsField3.getText();
+                    query += " AND " + where3 + " = ?";
+                }
+            }
+            try 
+            {
+                System.out.println(query);
+                PreparedStatement stmt = conn.prepareStatement(query);
+                stmt.setString(1, equals);
+                int parameterIndex = 2;
+                if (!ntfDEqualsField2.getText().isEmpty()) 
+                {
+                    String equals2 = ntfDEqualsField2.getText();
+                    stmt.setString(parameterIndex++, equals2);
+                    if (!ntfDEqualsField3.getText().isEmpty())
+                    {
+                        String equals3 = ntfDEqualsField3.getText();
+                        stmt.setString(parameterIndex++, equals3);
+                    }
+                }
+                stmt.executeUpdate();
+                JOptionPane.showMessageDialog(this, "All matching customers deleted!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } 
+            catch (SQLException ex) 
+            {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error deleting customer!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+    }
+    
     private void listClient()
     {
-
+        String[] columnNames = {"Customer ID", "Store ID", "First Name", "Last Name", "Email", "Address ID", "Active", "Create Date", "Last Update"};
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+        try
+        {
+            ResultSet rs = selectQuery("SELECT * FROM customer");
+            while(rs.next())
+            {
+                String customer_id = rs.getString("customer_id");
+                String store_id = rs.getString("store_id");
+                String first_name = rs.getString("first_name");
+                String last_name = rs.getString("last_name");
+                String email = rs.getString("email");
+                String address_id = rs.getString("address_id");
+                String active = rs.getString("active");
+                String create_date = rs.getString("create_date");
+                String last_update = rs.getString("last_update");
+                String[] row = {customer_id, store_id, first_name, last_name, email, address_id, active, create_date, last_update};
+                model.addRow(row);
+            }
+            notificationsAllTable.setModel(model);
+        }
+        catch(Exception ex)
+        {
+            ex.printStackTrace();
+        }
+        DefaultTableModel model2 = new DefaultTableModel(columnNames, 0);
+        try
+        {
+            ResultSet rs = selectQuery("SELECT * FROM customer WHERE active = 0");
+            while(rs.next())
+            {
+                String customer_id = rs.getString("customer_id");
+                String store_id = rs.getString("store_id");
+                String first_name = rs.getString("first_name");
+                String last_name = rs.getString("last_name");
+                String email = rs.getString("email");
+                String address_id = rs.getString("address_id");
+                String active = rs.getString("active");
+                String create_date = rs.getString("create_date");
+                String last_update = rs.getString("last_update");
+                String[] row = {customer_id, store_id, first_name, last_name, email, address_id, active, create_date, last_update};
+                model2.addRow(row);
+            }
+            notificationsDroppedTable.setModel(model2);
+        }
+        catch(Exception ex)
+        {
+            ex.printStackTrace();
+        }
+        setPlaceholderText(ntfLSearch1, "Search...");
+        setPlaceholderText(ntfLSearch2, "Search...");
+        ntfLSearch1.addKeyListener(new KeyAdapter()
+        {
+            @Override
+            public void keyReleased(KeyEvent e) 
+            {
+                filterTable(ntfLSearch1.getText(), notificationsAllTable);
+            }
+        });
+        ntfLSearch2.addKeyListener(new KeyAdapter()
+        {
+            @Override
+            public void keyReleased(KeyEvent e) 
+            {
+                filterTable(ntfLSearch2.getText(), notificationsDroppedTable);
+            }
+        });
+    }
+    private void setComboBox(JComboBox box, String[] items)
+    {
+        for(String item : items)
+        {
+            box.addItem(item);
+        }
     }
     public void populateFilms()
     {
@@ -411,12 +615,12 @@ public class HomePage extends JFrame
         }
         return rs;
     }
-    private void filterTable(String searchStr) 
+    private void filterTable(String searchStr, JTable table) 
     {
-        DefaultTableModel model = (DefaultTableModel) staffTable.getModel();
-        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
-        staffTable.setRowSorter(sorter);
-        sorter.setRowFilter(RowFilter.regexFilter(searchStr));
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        TableRowSorter<DefaultTableModel> tr = new TableRowSorter<DefaultTableModel>(model);
+        table.setRowSorter(tr);
+        tr.setRowFilter(RowFilter.regexFilter(searchStr));
     }
     private void setPlaceholderText(JTextField field, String text)
     {
@@ -443,6 +647,10 @@ public class HomePage extends JFrame
                 }
             }
         });
+    }
+    private void clearComboBox(JComboBox box)
+    {
+        box.removeAllItems();
     }
     public static void main(String[] args)
     {
