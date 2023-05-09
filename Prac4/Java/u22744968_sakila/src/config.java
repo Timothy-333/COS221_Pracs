@@ -5,7 +5,7 @@ public class config
     String dbPort = "3306";
     String dbName = "u22744968_sakila";
     String dbUsername = "root";
-    String dbPassword = "TimIsAwesome";
+    String dbPassword = "Timone2357";
     String dbDriver = "org.mariadb.jdbc.Driver";
     String dbURL = dbProtocol + dbHost + ":" + dbPort + "/" + dbName;
 
